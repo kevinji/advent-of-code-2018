@@ -1,5 +1,5 @@
-(executable
- (name day1)
+(executables
+ (names day1 day2)
  (libraries core
             async)
  (preprocess (pps ppxlib ppx_jane ppxlib.runner)))
