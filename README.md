@@ -1,2 +1,2 @@
-# advent-of-code-2018
-Solutions to the Advent of Code 2018 puzzles.
+# Advent of Code 2018
+OCaml solutions to the Advent of Code 2018 puzzles.
