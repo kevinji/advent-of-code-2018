@@ -1,7 +1,8 @@
 (executables
- (names day1 day2)
+ (names day1 day2 day3)
  (libraries core
-            async)
+            async
+            re)
  (preprocess (pps ppxlib ppx_jane ppxlib.runner)))
 
 (alias
