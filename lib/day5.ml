@@ -19,15 +19,14 @@ let rec react_polymer ~scanned ~remaining =
   match Fdeque.dequeue_front remaining with
   | None -> Fdeque.to_list scanned
   | Some (unit, remaining) ->
-    match Fdeque.peek_front remaining with
+    match Fdeque.dequeue_front remaining with
     | None ->
       let scanned = Fdeque.enqueue_back scanned unit in
       react_polymer ~scanned ~remaining
-    | Some next_unit ->
+    | Some (next_unit, next_remaining) ->
       if will_react unit next_unit
       then (
-        (* [next_unit] must be at the front of [remaining]. *)
-        let remaining = Fdeque.drop_front_exn remaining in
+        let remaining = next_remaining in
         match Fdeque.dequeue_back scanned with
         | None -> react_polymer ~scanned ~remaining
         | Some (prev_unit, scanned) ->
