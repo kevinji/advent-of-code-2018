@@ -11,20 +11,21 @@ let read_polymer file_name =
   String.to_list polymer
 ;;
 
-let will_react unit next_unit =
-  Char.(unit <> next_unit) && Char.(lowercase unit = lowercase next_unit)
+let will_react curr_unit next_unit =
+  Char.(curr_unit <> next_unit)
+  && Char.(lowercase curr_unit = lowercase next_unit)
 ;;
 
 let rec react_polymer ~scanned ~remaining =
   match Fdeque.dequeue_front remaining with
   | None -> Fdeque.to_list scanned
-  | Some (unit, remaining) ->
+  | Some (curr_unit, remaining) ->
     match Fdeque.dequeue_front remaining with
     | None ->
-      let scanned = Fdeque.enqueue_back scanned unit in
+      let scanned = Fdeque.enqueue_back scanned curr_unit in
       react_polymer ~scanned ~remaining
     | Some (next_unit, next_remaining) ->
-      if will_react unit next_unit
+      if will_react curr_unit next_unit
       then (
         let remaining = next_remaining in
         match Fdeque.dequeue_back scanned with
@@ -33,7 +34,7 @@ let rec react_polymer ~scanned ~remaining =
           let remaining = Fdeque.enqueue_front remaining prev_unit in
           react_polymer ~scanned ~remaining)
       else (
-        let scanned = Fdeque.enqueue_back scanned unit in
+        let scanned = Fdeque.enqueue_back scanned curr_unit in
         react_polymer ~scanned ~remaining)
 ;;
 
