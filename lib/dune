@@ -1,5 +1,5 @@
 (executables
- (names day1 day2 day3)
+ (names day1 day2 day3 day4)
  (libraries core
             async
             re)
