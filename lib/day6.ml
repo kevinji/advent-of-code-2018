@@ -45,6 +45,11 @@ module Point = struct
     { x = t.x - origin.x; y = t.y - origin.y }
   ;;
 
+  let dist t1 t2 =
+    let { x; y } = O.(t2 - t1) in
+    Int.abs x + Int.abs y
+  ;;
+
   include O
 end
 
@@ -233,9 +238,27 @@ let part_1 file_name =
   printf "%d\n" max_area
 ;;
 
-let part_2 file_name =
+let total_dist points point =
+  List.sum (module Int) points ~f:(Point.dist point)
+;;
+
+let generate_points ~(bottom_right : Point.t) =
+  let open List.Let_syntax in
+  let%bind x = List.range ~stop:`inclusive 0 bottom_right.x in
+  let%map y = List.range ~stop:`inclusive 0 bottom_right.y in
+  { Point.x; y }
+;;
+
+let part_2 file_name ~max_dist =
   let%map points = read_points file_name in
-  printf "%d\n" (List.length points)
+  let top_left, bottom_right = find_corners points in
+  let points = List.map points ~f:(Point.shift ~origin:top_left) in
+  let bottom_right = Point.shift bottom_right ~origin:top_left in
+  let points_under_max_dist =
+    List.filter (generate_points ~bottom_right)
+      ~f:(fun point -> total_dist points point < max_dist)
+  in
+  printf "%d\n" (List.length points_under_max_dist)
 ;;
 
 let cmd_part_1 =
@@ -254,8 +277,11 @@ let cmd_part_2 =
     (let open Command.Let_syntax in
      let%map_open input_file =
        flag "-input" (required file) ~doc:"FILE path to input file"
+     and max_dist =
+       flag "-max-dist" (optional_with_default 10000 int)
+         ~doc:"DIST maximum distance from all points (default: 10000)"
      in
-     fun () -> part_2 input_file)
+     fun () -> part_2 input_file ~max_dist)
 ;;
 
 let command =
