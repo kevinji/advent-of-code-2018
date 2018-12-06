@@ -16,33 +16,31 @@ let will_react curr_unit next_unit =
   && Char.(lowercase curr_unit = lowercase next_unit)
 ;;
 
-let rec react_polymer ~scanned ~remaining =
-  match Fdeque.dequeue_front remaining with
-  | None -> Fdeque.to_list scanned
-  | Some (curr_unit, remaining) ->
-    match Fdeque.dequeue_front remaining with
-    | None ->
-      let scanned = Fdeque.enqueue_back scanned curr_unit in
-      react_polymer ~scanned ~remaining
-    | Some (next_unit, next_remaining) ->
+let rec react_polymer ~scanned_rev ~remaining =
+  match remaining with
+  | [] -> List.rev scanned_rev
+  | curr_unit :: remaining ->
+    match remaining with
+    | [] ->
+      let scanned_rev = curr_unit :: scanned_rev in
+      react_polymer ~scanned_rev ~remaining
+    | next_unit :: next_remaining ->
       if will_react curr_unit next_unit
       then (
         let remaining = next_remaining in
-        match Fdeque.dequeue_back scanned with
-        | None -> react_polymer ~scanned ~remaining
-        | Some (prev_unit, scanned) ->
-          let remaining = Fdeque.enqueue_front remaining prev_unit in
-          react_polymer ~scanned ~remaining)
+        match scanned_rev with
+        | [] -> react_polymer ~scanned_rev ~remaining
+        | prev_unit :: scanned_rev ->
+          let remaining = prev_unit :: remaining in
+          react_polymer ~scanned_rev ~remaining)
       else (
-        let scanned = Fdeque.enqueue_back scanned curr_unit in
-        react_polymer ~scanned ~remaining)
+        let scanned_rev = curr_unit :: scanned_rev in
+        react_polymer ~scanned_rev ~remaining)
 ;;
 
 let length_of_final_polymer polymer_units =
   let final_polymer_units =
-    let scanned = Fdeque.empty in
-    let remaining = Fdeque.of_list polymer_units in
-    react_polymer ~scanned ~remaining
+    react_polymer ~scanned_rev:[] ~remaining:polymer_units
   in
   List.length final_polymer_units
 ;;
