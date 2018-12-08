@@ -63,18 +63,18 @@ let make_tree tokens =
         Sequence.range 0 children_count
         |> Sequence.fold ~init:(tokens, [])
           ~f:(fun (tokens, children_rev) (_ : int) ->
-              let tokens, node = helper tokens in
-              tokens, node :: children_rev)
+            let tokens, node = helper tokens in
+            tokens, node :: children_rev)
       in
       let children = List.rev children_rev in
       let tokens, metadata_rev =
-        List.range 0 metadata_count
-        |> List.fold ~init:(tokens, [])
+        Sequence.range 0 metadata_count
+        |> Sequence.fold ~init:(tokens, [])
           ~f:(fun (tokens, metadata_rev) (_ : int) ->
-              match tokens with
-              | [] -> raise_s [%message "Tokens unexpectedly empty"]
-              | token :: tokens ->
-                tokens, token :: metadata_rev)
+            match tokens with
+            | [] -> raise_s [%message "Tokens unexpectedly empty"]
+            | token :: tokens ->
+              tokens, token :: metadata_rev)
       in
       let metadata = List.rev metadata_rev in
       let node = { Node.children; metadata } in
