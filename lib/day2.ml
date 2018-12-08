@@ -1,13 +1,12 @@
 open! Core
 open! Async
+open Utils
+
+module Char_counter = Make_counter (Char)
 
 let read_char_freqs_of_ids file_name =
   let%map ids = Reader.file_lines file_name in
-  List.map ids ~f:(fun id ->
-    String.fold id ~init:Char.Map.empty ~f:(fun char_freqs ch ->
-      Map.update char_freqs ch ~f:(function
-        | None -> 1
-        | Some freq -> freq + 1)))
+  List.map ids ~f:(fun id -> String.to_list id |> Char_counter.of_list)
 ;;
 
 let part_1 file_name =
