@@ -1,7 +1,8 @@
 (executables
- (names day1 day2 day3 day4 day5 day6)
+ (names day1 day2 day3 day4 day5 day6 day7)
  (libraries core
             async
+            ocamlgraph
             re)
  (preprocess (pps ppxlib ppx_jane ppxlib.runner)))
 
