@@ -50,46 +50,38 @@ let rec clockwise marbles curr i =
 ;;
 
 let play_marble_game (game : Game.t) =
-  let process_marble
-      (player_points, marbles, curr)
-      marble
-    : _ Base.Continue_or_stop.t
-    =
-    let player_points, marbles, curr =
-      if Int.(marble mod 23 = 0)
-      then (
+  let process_marble (player_points, marbles, curr) marble =
+    if Int.(marble mod 23 = 0)
+    then (
+      let marble_7 = clockwise marbles curr (-7) in
+      let curr = clockwise marbles marble_7 1 in
+      Doubly_linked.remove marbles marble_7;
+      let player_points =
         let curr_player = marble mod game.player_count in
-        let score =
+        let old_score =
           Map.find player_points curr_player
           |> Option.value ~default:0
         in
-        let marble_7 = clockwise marbles curr (-7) in
-        let curr = clockwise marbles marble_7 1 in
-        Doubly_linked.remove marbles marble_7;
-        let score = score + marble + Doubly_linked.Elt.value marble_7 in
-        let player_points = Map.set player_points ~key:curr_player ~data:score in
-        player_points, marbles, curr
-      )
-      else (
-        let marble_1 = clockwise marbles curr 1 in
-        let curr = Doubly_linked.insert_after marbles marble_1 marble in
-        player_points, marbles, curr)
-    in
-    if Int.(marble = game.last_marble)
-    then Stop player_points
-    else Continue (player_points, marbles, curr)
+        let score = old_score + marble + Doubly_linked.Elt.value marble_7 in
+        Map.set player_points ~key:curr_player ~data:score
+      in
+      player_points, marbles, curr)
+    else (
+      let marble_1 = clockwise marbles curr 1 in
+      let curr = Doubly_linked.insert_after marbles marble_1 marble in
+      player_points, marbles, curr)
   in
-  let next_marbles =
-    Sequence.unfold ~init:1 ~f:(fun next -> Some (next, next + 1))
+  let player_points, _marbles, _curr =
+    let next_marbles = Sequence.range ~stop:`inclusive 1 game.last_marble in
+    let player_points = Int.Map.empty in
+    let marbles = Doubly_linked.of_list [ 0 ] in
+    let curr = Doubly_linked.last_elt marbles |> Option.value_exn in
+    Sequence.fold
+      next_marbles
+      ~init:(player_points, marbles, curr)
+      ~f:process_marble
   in
-  let player_points = Int.Map.empty in
-  let marbles = Doubly_linked.of_list [ 0 ] in
-  let curr = Doubly_linked.last_elt marbles |> Option.value_exn in
-  Sequence.fold_until
-    next_marbles
-    ~init:(player_points, marbles, curr)
-    ~f:process_marble
-    ~finish:(fun _ -> raise_s [%message "No next marble found"])
+  player_points
 ;;
 
 let find_high_score game =
