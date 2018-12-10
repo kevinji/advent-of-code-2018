@@ -1,17 +1,20 @@
 open! Core
 open! Async
+open Utils
 
 module G = Graph.Imperative.Digraph.Concrete (Char)
 
 let edge_re =
-  Re.Perl.compile_pat "Step ([A-Z]) must be finished before \
-                       step ([A-Z]) can begin."
+  let open Tyre in
+  [%tyre "Step (?<from>[A-Z]) must be finished before \
+          step (?<to_>[A-Z]) can begin."]
+  |> compile
 ;;
 
 let edge_of_string string =
-  let groups = Re.exec edge_re string in
-  let from = Re.Group.get groups 1 |> Char.of_string in
-  let to_ = Re.Group.get groups 2 |> Char.of_string in
+  let edge_obj = exec_re edge_re string in
+  let from = Char.of_string edge_obj#from in
+  let to_ = Char.of_string edge_obj#to_ in
   G.E.create from () to_
 ;;
 

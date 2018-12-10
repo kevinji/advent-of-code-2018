@@ -1,9 +1,6 @@
 open! Core
 open! Async
-
-let game_re =
-  Re.Perl.compile_pat "(\\d+) players; last marble is worth (\\d+) points"
-;;
+open Utils
 
 module Game = struct
   type t =
@@ -11,6 +8,17 @@ module Game = struct
     ; last_marble : int
     }
   [@@deriving sexp]
+
+  let re =
+    let open Tyre in
+    [%tyre "(?&player_count:pos_int) players; last marble is worth \
+            (?&last_marble:pos_int) points"]
+    |> compile
+  ;;
+
+  let of_object obj =
+    { player_count = obj#player_count; last_marble = obj#last_marble }
+  ;;
 end
 
 let read_game file_name =
@@ -20,10 +28,7 @@ let read_game file_name =
     | [] -> raise_s [%message "No string found"]
     | _ :: _ -> raise_s [%message "More than one line found"]
   in
-  let game_groups = Re.exec game_re game_string in
-  let player_count = Re.Group.get game_groups 1 |> Int.of_string in
-  let last_marble = Re.Group.get game_groups 2 |> Int.of_string in
-  { Game.player_count; last_marble }
+  Game.of_object (exec_re Game.re game_string)
 ;;
 
 let rec clockwise marbles curr i =

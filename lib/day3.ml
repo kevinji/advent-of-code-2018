@@ -1,5 +1,6 @@
 open! Core
 open! Async
+open Utils
 
 module Point = struct
   module T = struct
@@ -24,6 +25,22 @@ module Claim = struct
     }
   [@@deriving sexp]
 
+  let re =
+    let open Tyre in
+    [%tyre "#(?&id:pos_int) @ (?&x:pos_int),(?&y:pos_int): \
+            (?&width:pos_int)x(?&height:pos_int)"]
+    |> compile
+  ;;
+
+  let of_object obj =
+    { id = obj#id
+    ; top_left_x = obj#x
+    ; top_left_y = obj#y
+    ; width = obj#width
+    ; height = obj#height
+    }
+  ;;
+
   let points t =
     let open Sequence.Let_syntax in
     let%bind y = Sequence.range t.top_left_y (t.top_left_y + t.height) in
@@ -34,16 +51,7 @@ end
 
 let read_claims file_name =
   let%map claims = Reader.file_lines file_name in
-  let claim_re = Re.Perl.compile_pat "#(\\d+) @ (\\d+),(\\d+): (\\d+)x(\\d+)" in
-  List.map claims ~f:(fun claim ->
-    let claim_groups = Re.exec claim_re claim in
-    { Claim.
-      id = Re.Group.get claim_groups 1 |> Int.of_string
-    ; top_left_x = Re.Group.get claim_groups 2 |> Int.of_string
-    ; top_left_y = Re.Group.get claim_groups 3 |> Int.of_string
-    ; width = Re.Group.get claim_groups 4 |> Int.of_string
-    ; height = Re.Group.get claim_groups 5 |> Int.of_string
-    })
+  List.map claims ~f:(fun claim -> Claim.of_object (exec_re Claim.re claim))
 ;;
 
 let find_multi_points claims =

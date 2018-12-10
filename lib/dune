@@ -3,8 +3,9 @@
  (libraries core
             async
             ocamlgraph
-            re)
- (preprocess (pps ppxlib ppx_jane ppxlib.runner)))
+            ppx_tyre
+            tyre)
+ (preprocess (pps ppxlib ppx_jane ppx_tyre ppxlib.runner)))
 
 (alias
  (name default)

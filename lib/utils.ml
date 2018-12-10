@@ -11,3 +11,11 @@ module Make_counter (Key : Comparable.S) = struct
           | Some freq -> freq + 1))
   ;;
 end
+
+let exec_re re string =
+  match Tyre.exec re string with
+  | Ok value -> value
+  | Error (`NoMatch (_, _)) ->
+    raise_s [%message "tyre does not match string"]
+  | Error (`ConverterFailure exn) -> raise exn
+;;

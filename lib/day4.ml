@@ -1,5 +1,6 @@
 open! Core
 open! Async
+open Utils
 
 module Action = struct
   type t =
@@ -8,7 +9,11 @@ module Action = struct
     | Wakes_up
   [@@deriving sexp, compare]
 
-  let begins_shift_re = Re.Perl.compile_pat "Guard #(\\d+) begins shift"
+  let begins_shift_re =
+    let open Tyre in
+    [%tyre "Guard #(?&guard_id:pos_int) begins shift"]
+    |> compile
+  ;;
 end
 
 module Record = struct
@@ -24,27 +29,26 @@ module Record = struct
   include Comparable.Make (T)
 end
 
+let action_log_re =
+  let open Tyre in
+  [%tyre "\\[(?<time>[^\\]]+)\\] (?<action>.+)"]
+  |> compile
+;;
+
 let read_records file_name =
   let%map action_logs = Reader.file_lines file_name in
-  let action_log_re = Re.Perl.compile_pat "\\[([^\\]]+)\\] (.+)" in
   List.map action_logs ~f:(fun action_log ->
-    let action_log_groups = Re.exec action_log_re action_log in
+    let action_log_obj = exec_re action_log_re action_log in
     let time =
-      Re.Group.get action_log_groups 1
-      |> Time.of_string_gen ~if_no_timezone:(`Use_this_one Time.Zone.utc)
+      Time.of_string_gen action_log_obj#time
+        ~if_no_timezone:(`Use_this_one Time.Zone.utc)
     in
     let action : Action.t =
-      match Re.Group.get action_log_groups 2 with
+      match action_log_obj#action with
       | "wakes up" -> Wakes_up
       | "falls asleep" -> Falls_asleep
       | action ->
-        let begins_shift_groups =
-          Re.exec_opt Action.begins_shift_re action
-          |> Option.value_exn
-            ~here:[%here]
-            ~message:"No matching action; this should never happen"
-        in
-        let guard_id = Re.Group.get begins_shift_groups 1 |> Int.of_string in
+        let guard_id = exec_re Action.begins_shift_re action in
         Begins_shift guard_id
     in
     { Record.time; action })
