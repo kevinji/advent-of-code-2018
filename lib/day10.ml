@@ -100,7 +100,7 @@ let main file_name =
 
 let command =
   Command.async
-    ~summary:"Day 9"
+    ~summary:"Day 10"
     (let open Command.Let_syntax in
      let%map_open input_file =
        flag "-input" (required file) ~doc:"FILE path to input file"
