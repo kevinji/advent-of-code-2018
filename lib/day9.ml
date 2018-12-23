@@ -1,6 +1,6 @@
 open! Core
 open! Async
-open Utils
+open! Utils
 
 module Game = struct
   type t =
@@ -22,12 +22,7 @@ module Game = struct
 end
 
 let read_game file_name =
-  let%map game_string =
-    match%map Reader.file_lines file_name with
-    | [ game_string ] -> game_string
-    | [] -> raise_s [%message "No string found"]
-    | _ :: _ -> raise_s [%message "More than one line found"]
-  in
+  let%map game_string = read_one_line file_name in
   Game.of_object (exec_re Game.re game_string)
 ;;
 

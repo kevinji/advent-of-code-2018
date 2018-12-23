@@ -6,3 +6,5 @@ module Make_counter (Key : Comparable.S) : sig
 end
 
 val exec_re : 'a Tyre.re -> string -> 'a
+
+val read_one_line : string -> string Deferred.t

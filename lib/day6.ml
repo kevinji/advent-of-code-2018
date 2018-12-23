@@ -1,5 +1,6 @@
 open! Core
 open! Async
+open! Utils
 
 module Point = struct
   module T = struct

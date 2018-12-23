@@ -1,6 +1,6 @@
 open! Core
 open! Async
-open Utils
+open! Utils
 
 module Node = struct
   type t =
@@ -31,12 +31,7 @@ module Node = struct
 end
 
 let read_tokens file_name =
-  let%map tokens_string =
-    match%map Reader.file_lines file_name with
-    | [ tokens_string ] -> tokens_string
-    | [] -> raise_s [%message "No tokens found"]
-    | _ :: _ -> raise_s [%message "More than one line found"]
-  in
+  let%map tokens_string = read_one_line file_name in
   let tokens =
     String.split tokens_string ~on:' '
     |> List.map ~f:Int.of_string

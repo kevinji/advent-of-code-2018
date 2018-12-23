@@ -4,12 +4,7 @@ open! Incremental_kernel
 open! Utils
 
 let read_serial_number file_name =
-  let%map serial_number =
-    match%map Reader.file_lines file_name with
-    | [ serial_number ] -> serial_number
-    | [] -> raise_s [%message "No serial number found"]
-    | _ :: _ -> raise_s [%message "More than one line found"]
-  in
+  let%map serial_number = read_one_line file_name in
   Int.of_string serial_number
 ;;
 

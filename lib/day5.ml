@@ -1,13 +1,9 @@
 open! Core
 open! Async
+open! Utils
 
 let read_polymer file_name =
-  let%map polymer =
-    match%map Reader.file_lines file_name with
-    | [ polymer ] -> polymer
-    | [] -> raise_s [%message "Input file empty"]
-    | _ :: _ -> raise_s [%message "Input file contained more than one line"]
-  in
+  let%map polymer = read_one_line file_name in
   String.to_list polymer
 ;;
 

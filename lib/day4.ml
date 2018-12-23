@@ -1,6 +1,6 @@
 open! Core
 open! Async
-open Utils
+open! Utils
 
 module Action = struct
   type t =

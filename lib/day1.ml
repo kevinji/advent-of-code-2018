@@ -1,5 +1,6 @@
 open! Core
 open! Async
+open! Utils
 
 let read_freq_changes file_name =
   let%map freq_changes = Reader.file_lines file_name in
