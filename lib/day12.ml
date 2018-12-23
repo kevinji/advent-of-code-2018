@@ -295,7 +295,7 @@ let cmd_part_2 =
 
 let command =
   Command.group
-    ~summary:"Day 11"
+    ~summary:"Day 12"
     [ "part-1", cmd_part_1; "part-2", cmd_part_2 ]
 ;;
 
